@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chat</title>
+</head>
+<body>
+    <p>You logged as <b>{{ . }}</b>. <a href="/profile">edit nick</a> | <a href="/logout">Logout</a></p>
+    Chat: <textarea id="chat" cols="30" rows="10"></textarea><br>
+    <button type="submit" onclick="subscribe();">Subscribe</button>
+    <button type="submit" onclick="leave();">Leave</button><br>
+    Message: <input type="text" id="message_body">
+    Recipient: <input type="text" id="recipient"><br>
+    <button type="submit" onclick="send();">Send</button>
+    <script>
+        var ws;
+
+        function subscribe() {
+            if (ws == undefined) {
+                ws = new WebSocket("ws://localhost:8000/ws");
+            } else {
+                return
+            }
+
+            ws.onopen = function() {
+                var c = document.getElementById("chat");
+                nickname = getCookie("nickname");
+                ws.send(JSON.stringify({"author": "System", "body": nickname + " connected."}));
+                c.value = c.value + "\nConnected";
+            }
+
+            ws.onmessage = function(e) {
+                var nickname = getCookie("nickname")
+                var c = document.getElementById("chat");
+                var message_obj = JSON.parse(e.data);
+                var message = "";
+                if (message_obj.recipient != undefined) {
+                    if (message_obj.recipient == nickname) {
+                        message += message_obj.author + " whispers to you: '" + message_obj.body +"'";
+                    } else if (message_obj.author == nickname) {
+                        message += "You whisper to " + message_obj.recipient + ": '" + message_obj.body + "'"
+                    }
+                    message = "***" + message + "***"
+                } else {
+                    if (message_obj.author == "System") {
+                        message += "SYSTEM: '"
+                    } else {
+                        message += message_obj.author + " says: '"
+                    }
+                    message +=  message_obj.body + "'"
+                }
+                c.value = c.value + "\n" + message;
+            }
+
+            ws.onclose = function() {
+                var c = document.getElementById("chat");
+                c.value = c.value + "\nDisconnected";
+                ws.close()
+                ws = undefined               
+            }
+        }
+
+        function send() {
+            nickname = getCookie("nickname");
+            message_body = document.getElementById("message_body").value;
+            recipient = document.getElementById("recipient").value;
+            var message = {
+                "author": nickname,
+                "body": message_body,
+                "recipient": recipient
+            };
+            var json_message = JSON.stringify(message);
+            ws.send(json_message);
+            message_body = "";
+        }
+
+        function leave() {
+            ws.close();
+        }
+        
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+    </script>
+</body>
+</html>
