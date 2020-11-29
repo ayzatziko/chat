@@ -43,8 +43,6 @@ func (chat *Chat) HandleConnections(w http.ResponseWriter, r *http.Request) {
 		}
 		chat.Broadcast <- &message
 	}
-
-	http.Error(w, "connection closed", 400)
 }
 
 func withLock(l sync.Locker, f func()) {

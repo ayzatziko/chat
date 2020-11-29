@@ -13,6 +13,7 @@ import (
 )
 
 type Chat struct {
+	Port      string
 	Users     repository.Users
 	Messages  repository.Messages
 	Broadcast chan *repository.Message
@@ -25,9 +26,10 @@ type Chat struct {
 	Router    *mux.Router
 }
 
-func CreateChat(users repository.Users, messages repository.Messages) *Chat {
+func CreateChat(users repository.Users, messages repository.Messages, port string) *Chat {
 	tplPath := filepath.Join(os.Getenv("GOPATH"), "src", "github.com", "ayzatziko", "chat", "templates")
 	chat := Chat{
+		Port:      port,
 		Users:     users,
 		Messages:  messages,
 		Clients:   make(map[string]*websocket.Conn),

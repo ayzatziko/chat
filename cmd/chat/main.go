@@ -42,7 +42,7 @@ func main() {
 		users = mem.New()
 	}
 
-	chat := app.CreateChat(users, &mem.LimitMessages{N: 100})
+	chat := app.CreateChat(users, &mem.LimitMessages{N: 100}, *port)
 
 	srv := http.Server{
 		Addr:    ":" + *port,

@@ -7,7 +7,7 @@
     <title>Chat</title>
 </head>
 <body>
-    <p>You logged as <b>{{ . }}</b>. <a href="/profile">edit nick</a> | <a href="/logout">Logout</a></p>
+    <p>You logged as <b>{{ .Nickname }}</b>. <a href="/profile">edit nick</a> | <a href="/logout">Logout</a></p>
     Chat: <textarea id="chat" cols="30" rows="10"></textarea><br>
     <button type="submit" onclick="subscribe();">Subscribe</button>
     <button type="submit" onclick="leave();">Leave</button><br>
@@ -19,7 +19,7 @@
 
         function subscribe() {
             if (ws == undefined) {
-                ws = new WebSocket("ws://localhost:8000/ws");
+                ws = new WebSocket("ws://localhost:{{ .Port }}/ws");
             } else {
                 return
             }
